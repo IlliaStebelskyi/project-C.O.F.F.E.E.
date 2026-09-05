@@ -6,6 +6,7 @@ namespace project_coffee.Data;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
     public DbSet<Category> Categories { get; set; }
+    
     public DbSet<Order> Orders { get; set; }
 
     public DbSet<Product> Products { get; set; }
@@ -15,6 +16,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<UserProfile> UserProfiles { get; set; }
 
     public DbSet<OrderProduct> OrderProducts { get; set; }
+
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
