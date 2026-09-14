@@ -25,7 +25,7 @@ public class OrderController(IOrderService orderService) : ControllerBase
     private bool IsAdmin => User.IsInRole("Admin");
 
     [HttpPost]
-    public async Task<IActionResult> CreateOrder(Guid userId, [FromBody] CreateOrderRequestDto request)
+    public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequestDto request)
     {
         try
         {
