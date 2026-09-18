@@ -1,17 +1,21 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import LoginPage from "./pages/auth/Login";
 import RegisterPage from "./pages/auth/Register";
+import HomePage from "./pages/Home";
+import CartPage from "./pages/Cart";
+import ProfilePage from "./pages/Profile";
+import { AppLayout } from "./components/AppLayout";
+import { RequireAuth } from "./components/RequireAuth";
 import instance, { setAccessToken } from "./api/instance";
 import { logout, setCredential } from "./slices/authSlice";
 import { getMe } from "./api/authApi";
-import ProductsPage from "./pages/ProductPage";
-import OrdersPage from "./pages/orders/OrdersPage";
-import ProfilePage from "./pages/UserProfile";
+import type { AppDispatch } from "./slices/index";
+
 
 function App() {
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<AppDispatch>();
     const [isLoading, setIsLoading] = useState(true);
     const hasRun = useRef(false);
 
@@ -42,13 +46,20 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/auth/login" element={<LoginPage />} />
-                <Route path="/auth/register" element={<RegisterPage />} />
-                <Route path="/" element={<h1>Welcome to C.O.F.F.E.E.</h1>} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
 
-                <Route path="/products" element={<ProductsPage />} />
-                <Route path="/orders" element={<OrdersPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
+                <Route
+                    element={
+                        <RequireAuth>
+                            <AppLayout />
+                        </RequireAuth>
+                    }
+                >
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/cart" element={<CartPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                </Route>
             </Routes>
         </BrowserRouter>
     );

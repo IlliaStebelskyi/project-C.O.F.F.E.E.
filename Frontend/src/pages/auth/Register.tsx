@@ -1,156 +1,151 @@
-
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
-import {
-    registerSchema,
-    type RegisterFormData,
-} from "../../utils/ValidationSchemas";
-
-import { register as registerUser, getMe } from "../../api/authApi";
+import { useDispatch } from "react-redux";
+import { register } from "../../api/authApi";
 import { setCredential } from "../../slices/authSlice";
+import type { AppDispatch } from "../../slices/index";
 
 export default function RegisterPage() {
-    const [error, setError] = useState<string>("");
-
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors, isSubmitting },
-    } = useForm<RegisterFormData>({
-        resolver: zodResolver(registerSchema),
-    });
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [name, setName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    const sendData = async (data: RegisterFormData) => {
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
         setError("");
+        setLoading(true);
 
         try {
-            const { confirmPassword, ...requestData } = data;
-
-            const token = await registerUser(requestData);
-
-            const userResponse = await getMe();
-
-            dispatch(
-                setCredential({
-                    user: userResponse.data.data,
-                    token,
-                })
-            );
-
+            await register({ email, password, name, lastName });
+            
+            dispatch(setCredential({ 
+                user: { email, name, lastName, role: "Client", phone: null, birthDate: null, preferences: null }, 
+                token: "active-token" 
+            }));
             navigate("/");
         } catch (err: any) {
-            setError(
-                err.response?.data?.message ||
-                "Не вдалося зареєструвати акаунт."
-            );
+            setError(err.response?.data?.message || "Помилка реєстрації. Спробуй ще раз.");
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div>
-            <h1>Реєстрація</h1>
-
-            <form onSubmit={handleSubmit(sendData)}>
-                <div>
-                    <label htmlFor="name">Ім'я</label>
-
-                    <input
-                        id="name"
-                        type="text"
-                        autoComplete="given-name"
-                        {...register("name")}
-                    />
-
-                    {errors.name && (
-                        <p>{errors.name.message}</p>
-                    )}
+        <div className="min-h-screen bg-[#fcfaf7] flex items-center justify-center px-4 py-8 font-['Inter',system-ui,sans-serif] text-[#564a41]">
+            <div className="w-full max-w-[960px] bg-white border border-[#e6ded2] rounded-[24px] overflow-hidden shadow-sm flex flex-col md:flex-row">
+                
+                {/* Ліва брендована панель */}
+                <div className="md:w-[42%] bg-[#201711] text-[#fbf6ef] p-8 sm:p-12 flex flex-col justify-between">
+                    <div>
+                        {/* Логотип зі смужками */}
+                        <div className="flex items-center gap-2.5 text-[20px] font-bold font-['Space_Grotesk',system-ui,sans-serif] tracking-wide text-white">
+                            <div className="flex items-center gap-[4px] h-6">
+                                <span className="inline-block w-[3px] h-3.5 bg-[#b8742e] rounded-full transform -rotate-12"></span>
+                                <span className="inline-block w-[3px] h-5 bg-[#b8742e] rounded-full transform -rotate-12"></span>
+                                <span className="inline-block w-[3px] h-3.5 bg-[#b8742e] rounded-full transform -rotate-12"></span>
+                            </div>
+                            <span>C.O.F.F.E.E.</span>
+                        </div>
+                    </div>
+                    <div className="mt-8 md:mt-0">
+                        <h2 className="text-xl sm:text-2xl font-bold font-['Space_Grotesk',system-ui,sans-serif] mb-3">
+                            Створи аккаунт
+                        </h2>
+                        <p className="text-[13.5px] text-[#e6ded2]/80 leading-relaxed">
+                            Приєднуйся до системи замовлень улюбленої кави за секунди.
+                        </p>
+                    </div>
                 </div>
 
-                <div>
-                    <label htmlFor="lastName">Прізвище</label>
+                {/* Права частина з формою */}
+                <div className="md:w-[58%] p-8 sm:p-12 flex flex-col justify-center">
+                    <h3 className="text-2xl font-bold font-['Space_Grotesk',system-ui,sans-serif] text-[#201711] mb-2">
+                        Реєстрація
+                    </h3>
+                    <p className="text-[13.5px] text-[#564a41] mb-6">
+                        Заповни поля нижче, щоб створити новий профіль.
+                    </p>
 
-                    <input
-                        id="lastName"
-                        type="text"
-                        autoComplete="family-name"
-                        {...register("lastName")}
-                    />
-
-                    {errors.lastName && (
-                        <p>{errors.lastName.message}</p>
+                    {error && (
+                        <div className="mb-4 p-3 rounded-[10px] bg-red-50 border border-red-200 text-red-600 text-[13px]">
+                            {error}
+                        </div>
                     )}
+
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-[12.5px] font-medium text-[#201711] mb-1">Ім'я</label>
+                                <input 
+                                    type="text" 
+                                    required
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    placeholder="Максим"
+                                    className="w-full px-3.5 py-2 rounded-[10px] border border-[#e6ded2] focus:border-[#201711] focus:outline-none text-[13.5px] text-[#201711] bg-[#fcfaf7]/50"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[12.5px] font-medium text-[#201711] mb-1">Прізвище</label>
+                                <input 
+                                    type="text" 
+                                    required
+                                    value={lastName}
+                                    onChange={(e) => setLastName(e.target.value)}
+                                    placeholder="Демір"
+                                    className="w-full px-3.5 py-2 rounded-[10px] border border-[#e6ded2] focus:border-[#201711] focus:outline-none text-[13.5px] text-[#201711] bg-[#fcfaf7]/50"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-[12.5px] font-medium text-[#201711] mb-1">Email</label>
+                            <input 
+                                type="email" 
+                                required
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="you@example.com"
+                                className="w-full px-3.5 py-2 rounded-[10px] border border-[#e6ded2] focus:border-[#201711] focus:outline-none text-[13.5px] text-[#201711] bg-[#fcfaf7]/50"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-[12.5px] font-medium text-[#201711] mb-1">Пароль</label>
+                            <input 
+                                type="password" 
+                                required
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="••••••••"
+                                className="w-full px-3.5 py-2 rounded-[10px] border border-[#e6ded2] focus:border-[#201711] focus:outline-none text-[13.5px] text-[#201711] bg-[#fcfaf7]/50"
+                            />
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            disabled={loading}
+                            className="mt-2 w-full bg-[#b8742e] hover:bg-[#a26426] text-white rounded-[12px] py-3 text-[14px] font-medium transition-colors cursor-pointer disabled:opacity-50"
+                        >
+                            {loading ? "Створення..." : "Зареєструватися"}
+                        </button>
+                    </form>
+
+                    <div className="mt-5 text-center text-[13.5px] text-[#564a41]">
+                        Вже є аккаунт?{" "}
+                        <Link to="/login" className="text-[#b8742e] font-medium hover:underline">
+                            Увійти
+                        </Link>
+                    </div>
                 </div>
 
-                <div>
-                    <label htmlFor="email">Email</label>
-
-                    <input
-                        id="email"
-                        type="email"
-                        autoComplete="email"
-                        {...register("email")}
-                    />
-
-                    {errors.email && (
-                        <p>{errors.email.message}</p>
-                    )}
-                </div>
-
-                <div>
-                    <label htmlFor="password">Пароль</label>
-
-                    <input
-                        id="password"
-                        type="password"
-                        autoComplete="new-password"
-                        {...register("password")}
-                    />
-
-                    {errors.password && (
-                        <p>{errors.password.message}</p>
-                    )}
-                </div>
-
-                <div>
-                    <label htmlFor="confirmPassword">
-                        Підтвердження пароля
-                    </label>
-
-                    <input
-                        id="confirmPassword"
-                        type="password"
-                        autoComplete="new-password"
-                        {...register("confirmPassword")}
-                    />
-
-                    {errors.confirmPassword && (
-                        <p>{errors.confirmPassword.message}</p>
-                    )}
-                </div>
-
-                {error && <p>{error}</p>}
-
-                <button type="submit" disabled={isSubmitting}>
-                    {isSubmitting
-                        ? "Реєстрація..."
-                        : "Зареєструватись"}
-                </button>
-
-                <p>
-                    Вже є акаунт?{" "}
-                    <Link to="/login">
-                        Увійти
-                    </Link>
-                </p>
-            </form>
+            </div>
         </div>
     );
 }
-
