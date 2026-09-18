@@ -6,7 +6,9 @@ import RegisterPage from "./pages/auth/Register";
 import instance, { setAccessToken } from "./api/instance";
 import { logout, setCredential } from "./slices/authSlice";
 import { getMe } from "./api/authApi";
-
+import ProductsPage from "./pages/ProductPage";
+import OrdersPage from "./pages/orders/OrdersPage";
+import ProfilePage from "./pages/UserProfile";
 
 function App() {
     const dispatch = useDispatch();
@@ -43,6 +45,10 @@ function App() {
                 <Route path="/auth/login" element={<LoginPage />} />
                 <Route path="/auth/register" element={<RegisterPage />} />
                 <Route path="/" element={<h1>Welcome to C.O.F.F.E.E.</h1>} />
+
+                <Route path="/products" element={<ProductsPage />} />
+                <Route path="/orders" element={<OrdersPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
             </Routes>
         </BrowserRouter>
     );
