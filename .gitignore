@@ -1,0 +1,10 @@
+.env
+Backend/bin/
+Backend/obj/
+Backend/out/
+Frontend/node_modules/
+Frontend/dist/
+.vs/
+.vscode/
+.idea/
+.DS_Store
