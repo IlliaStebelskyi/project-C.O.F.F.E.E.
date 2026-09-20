@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import type { SubmitEventHandler } from "react";
 import { createOrder, deleteOrder, getMyOrders, type CreateOrderRequest, type Order } from "../../api/order";
+import { getProducts, type Product } from "../../api/product";
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState<Order[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
     const [error, setError] = useState("");
 
     const [productId, setProductId] = useState("");
@@ -19,8 +21,18 @@ export default function OrdersPage() {
         }
     };
 
+    const loadProducts = async () => {
+        try {
+            const data = await getProducts();
+            setProducts(data);
+        } catch {
+            setError("Failed to load products.");
+        }
+    };
+
     useEffect(() => {
         loadOrders();
+        loadProducts();
     }, []);
 
     const handleCreate: SubmitEventHandler<HTMLFormElement> = async (e) => {
@@ -60,11 +72,14 @@ export default function OrdersPage() {
             <h1>Мої замовлення</h1>
 
             <form onSubmit={handleCreate}>
-                <input
-                    placeholder="ID товару"
-                    value={productId}
-                    onChange={(e) => setProductId(e.target.value)}
-                />
+                <select value={productId} onChange={(e) => setProductId(e.target.value)}>
+                    <option value="">Оберіть товар</option>
+                    {products.map((product) => (
+                        <option key={product.id} value={product.id}>
+                            {product.name} — {product.price}
+                        </option>
+                    ))}
+                </select>
                 <input
                     type="number"
                     placeholder="Кількість"
@@ -86,7 +101,6 @@ export default function OrdersPage() {
                     <li key={order.id}>
                         <p>Замовлення #{order.id}</p>
                         <p>Статус: {order.status}</p>
-                        <p>Сума: {order.totalAmount}</p>
                         <p>Час самовивозу: {order.expectedPickupTime}</p>
                         <ul>
                             {order.items.map((item) => (

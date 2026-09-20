@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { SubmitEventHandler } from "react";
 import { createProduct, deleteProduct, getProducts, updateProduct, type Product, type ProductRequest } from "../api/product";
 import { getCategories, type Category } from "../api/categoryApi";
+import { addCartItem } from "../api/Cart";
 
 
 export default function ProductsPage() {
@@ -88,6 +89,14 @@ export default function ProductsPage() {
         }
     };
 
+    const handleAddToCart = async (productId: string) => {
+        try {
+            await addCartItem({ productId, quantity: 1, specialRequests: null });
+        } catch {
+            setError("Failed to add to cart.");
+        }
+    };
+
     return (
         <div>
             <h1>Товари</h1>
@@ -143,6 +152,7 @@ export default function ProductsPage() {
                         <p>Ціна: {product.price}</p>
                         <p>Категорія: {product.categoryName}</p>
                         <p>{product.isAvailable ? "Доступний" : "Недоступний"}</p>
+                        <button onClick={() => handleAddToCart(product.id)}>Додати в кошик</button>
                         <button onClick={() => handleToggleAvailable(product)}>
                             {product.isAvailable ? "Деактивувати" : "Активувати"}
                         </button>

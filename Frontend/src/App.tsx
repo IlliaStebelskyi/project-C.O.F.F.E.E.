@@ -9,6 +9,9 @@ import { getMe } from "./api/authApi";
 import ProductsPage from "./pages/ProductPage";
 import OrdersPage from "./pages/orders/OrdersPage";
 import ProfilePage from "./pages/UserProfile";
+import CategoriesPage from "./pages/CategoryPage";
+import OrderDetailsPage from "./pages/orders/OrderDetailsPage";
+import CartPage from "./pages/CartPage";
 
 function App() {
     const dispatch = useDispatch();
@@ -49,6 +52,9 @@ function App() {
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/orders" element={<OrdersPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
+                 <Route path="/categories" element={<CategoriesPage />} />
+                <Route path="/orders/:id" element={<OrderDetailsPage />} />
+                <Route path="/cart" element={<CartPage />} />
             </Routes>
         </BrowserRouter>
     );
